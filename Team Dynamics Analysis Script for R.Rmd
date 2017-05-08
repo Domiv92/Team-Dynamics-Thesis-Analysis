@@ -1,0 +1,288 @@
+---
+title: "Team Dynamics"
+output: html_notebook
+---
+
+###Loading Packages; These Packages Must Be Installed Prior to Loading###
+```{r}
+suppressPackageStartupMessages(library(psych))
+suppressPackageStartupMessages(library(readxl))
+suppressPackageStartupMessages(library(moments))
+suppressPackageStartupMessages(library(lavaan))
+suppressPackageStartupMessages(library(sem))
+suppressPackageStartupMessages(library(semPlot))
+suppressPackageStartupMessages(library(gplots))
+```
+###Load Data Sets; The Arguement for this Function Varies Depending on Local File Source###
+```{r}
+TeamDynamicsData <- read_excel("C:/Users/Domiv_000/Desktop/School/Thesis/Data/TeamDynamicsData.xlsx")
+View(TeamDynamicsData)
+TeamDynamicsDataFull <- read_excel("C:/Users/Domiv_000/Desktop/School/Thesis/Data/TeamDynamicsDataFull.xlsx")
+View(TeamDynamicsDataFull)
+```
+###Check Construct Reliability###
+```{r}
+StereotypeThreatConstruct <- data.frame(TeamDynamicsDataFull$`StereotypeThreat-1`, 
+                                        TeamDynamicsDataFull$`StereotypeThreat-2`,
+                                        TeamDynamicsDataFull$`StereotypeThreat-3`)
+alpha(x = StereotypeThreatConstruct, title = "Stereotype Threat Reliability")
+
+CommunalGoalAffordanceConstruct <-
+      data.frame(TeamDynamicsDataFull$`CommunalGoalFulfillment-TaskFull`,
+                 TeamDynamicsDataFull$`CommunalGoalFulfillment-CareerFull `,
+                 TeamDynamicsDataFull$`CommunalGoalFulfillmentShort-WorkingWithPeople`,
+                 TeamDynamicsDataFull$`CommunalGoalFulfillmentShort-HelpingOthers`,
+                 TeamDynamicsDataFull$`CommunalGoalFulfillmentShort-ServingCommunity`)
+alpha(x = CommunalGoalAffordanceConstruct, title = "Communal Goal Affordance Reliability")
+
+AgenticGoalAffordanceConstruct <- 
+      data.frame(TeamDynamicsDataFull$`AgenticGoalFulfillment-TaskFull`,
+                 TeamDynamicsDataFull$`AgenticGoalFulfillment-CareerFull`,
+                 TeamDynamicsDataFull$`AgenticGoalFulfillmentShort-Achievement`,
+                 TeamDynamicsDataFull$`AgenticGoalFulfillmentShort-Power`,
+                 TeamDynamicsDataFull$`AgenticGoalFulfillmentShort-Experiences`,
+                 TeamDynamicsDataFull$`AgenticGoalFulfillmentShort-Excitement`)
+alpha(x = AgenticGoalAffordanceConstruct, title = "Agentic Goal Affordance Reliability")
+
+StateAnxietyConstruct <- data.frame(TeamDynamicsDataFull$`StateAnxiety-1`,
+                                    TeamDynamicsDataFull$`StateAnxiety-2RC`,
+                                    TeamDynamicsDataFull$`StateAnxiety-3`,
+                                    TeamDynamicsDataFull$`StateAnxiety-4`,
+                                    TeamDynamicsDataFull$`StateAnxiety-5RC`,
+                                    TeamDynamicsDataFull$`StateAnxiety-6RC`,
+                                    TeamDynamicsDataFull$`StateAnxiety-7RC`,
+                                    TeamDynamicsDataFull$`StateAnxiety-8`,
+                                    TeamDynamicsDataFull$`StateAnxiety-9RC`,
+                                    TeamDynamicsDataFull$`StateAnxiety-10`,
+                                    TeamDynamicsDataFull$`StateAnxiety-11`,
+                                    TeamDynamicsDataFull$`StateAnxiety-12`)
+alpha(x = StateAnxietyConstruct, title = "State Anxiety Reliability")
+
+BelongingConstruct <- data.frame(TeamDynamicsDataFull$`Belonging-1`,
+                                 TeamDynamicsDataFull$`Belonging-2`,
+                                 TeamDynamicsDataFull$`Belonging-3`)
+alpha(x = BelongingConstruct, title = "Belonging Reliability")
+
+ScienceMotivationConstruct <- data.frame(TeamDynamicsDataFull$`ScienceMotivation-1`,
+                                         TeamDynamicsDataFull$`ScienceMotivation-2`,
+                                         TeamDynamicsDataFull$`ScienceMotivation-3`,
+                                         TeamDynamicsDataFull$`ScienceMotivation-4RC`,
+                                         TeamDynamicsDataFull$`ScienceMotivation-5`,
+                                         TeamDynamicsDataFull$`ScienceMotivation-6`,
+                                         TeamDynamicsDataFull$`ScienceMotivation-7`,
+                                         TeamDynamicsDataFull$`ScienceMotivation-8`,
+                                         TeamDynamicsDataFull$`ScienceMotivation-9`,
+                                         TeamDynamicsDataFull$`ScienceMotivation-10`)
+alpha(x = ScienceMotivationConstruct, title = "Science Motivation Reliability")
+
+ScienceDomainIdentificationConstruct <- data.frame(
+      TeamDynamicsDataFull$`ScienceDomainIdentification-1`,
+      TeamDynamicsDataFull$`ScienceDomainIdentification-2`,
+      TeamDynamicsDataFull$`ScienceDomainIdentification-3`,
+      TeamDynamicsDataFull$`ScienceDomainIdentification-4`,
+      TeamDynamicsDataFull$`ScienceDomainIdentification-5`,
+      TeamDynamicsDataFull$`ScienceDomainIdentification-6`)
+alpha(x = ScienceDomainIdentificationConstruct, 
+      title = "Science Domain Identification Reliability")
+
+PartnerRatingsConstruct <- data.frame(TeamDynamicsDataFull$`PartnerRatings-Friendliness`,
+                                      TeamDynamicsDataFull$`PartnerRatings-Competency`,
+                                      TeamDynamicsDataFull$`PartnerRatings-Condescention`,
+                                      TeamDynamicsDataFull$`PartnerRatings-Appropriatness `,
+                                      TeamDynamicsDataFull$`PartnerRatings-Welcomingness`,
+                                      TeamDynamicsDataFull$`PartnerRatings-Respectfulness`,
+                                      TeamDynamicsDataFull$`PartnerRatings-Talk`,
+                                      TeamDynamicsDataFull$`PartnerRatings-HangOut`,
+                                      TeamDynamicsDataFull$`PartnerRatings-WorkWith`,
+                                      TeamDynamicsDataFull$`PartnerRatings-Experience`)
+alpha(x = PartnerRatingsConstruct, title = "Partner Ratings Reliability")
+
+```
+###Descriptive Statistics; Descriptives by Condition###
+```{r}
+attach(TeamDynamicsData)
+describe(TeamDynamicsData)
+describeBy(x = TeamDynamicsData, group = Condition)
+``` 
+
+#Check Assumptions of ANOVA#
+```{r}
+hist(TeamDynamicsData$StereotypeThreat, main = "", 
+     xlab = "Stereotype Threat", 
+     xlim = c(1,5), freq = FALSE, col = "Light Blue")
+lines(density(TeamDynamicsData$StereotypeThreat))
+
+hist(TeamDynamicsData$CommunalValue, main = "", xlab = "Communal Goal Affordances",
+     xlim = c(1, 7), freq = FALSE, col = "Light Blue")
+lines(density(TeamDynamicsData$CommunalValue))
+
+hist(TeamDynamicsData$StateAnxiety, main = "", xlab = "State Anxiety", 
+     xlim = c(1,5), freq = FALSE, col = "Light Blue")
+lines(density(TeamDynamicsData$StateAnxiety))
+
+hist(TeamDynamicsData$Belonging, main = "", xlab = "Belonging", 
+     xlim = c(1,7), freq = FALSE, col = "Light Blue")
+lines(density(TeamDynamicsData$Belonging))
+
+hist(TeamDynamicsData$FutureMotivation, main = "", xlim = c(1,7),
+     xlab = "Future Science Motivation", freq = FALSE,
+     col = "Light Blue")
+lines(density(TeamDynamicsData$FutureMotivation))
+
+hist(TeamDynamicsData$ScienceMotivation, main = "", xlab = "Science Motivation", 
+     xlim = c(1,7), freq = FALSE, col = "Light Blue")
+lines(density(TeamDynamicsData$ScienceMotivation))
+
+hist(TeamDynamicsData$ScienceDomainIdentification, main = "", xlim = c(1,5),
+     xlab = "Science Domain Identification", freq = FALSE,
+     col = "Light Blue")
+lines(density(TeamDynamicsData$ScienceDomainIdentification))
+
+hist(TeamDynamicsData$PartnerRatings, main = "", xlab = "Partner Ratings", 
+     xlim = c(1,9), freq = FALSE, col = "Light Blue")
+lines(density(TeamDynamicsData$PartnerRatings))
+
+
+```
+#Non-Parametric Kruskal-Wallis ANOVAs Due to Violations of Assumptions#
+```{r}
+#Stereotype Threat X Condition#
+kruskal.test(data = TeamDynamicsData, StereotypeThreat~Condition)
+
+#Communal Goal Affordance X Condition#
+kruskal.test(data = TeamDynamicsData, CommunalValue~Condition)
+
+#State Anxiety X Condition#
+kruskal.test(data = TeamDynamicsData, StateAnxiety~Condition)
+
+#Belonging X Condition#
+kruskal.test(data = TeamDynamicsData, Belonging~Condition)
+
+#Future Motivation#
+kruskal.test(data = TeamDynamicsData, FutureMotivation~Condition)
+
+#Science Motivation X Condition#
+kruskal.test(data = TeamDynamicsData, ScienceMotivation~Condition)
+
+#Science Domain Identification X Condition#
+kruskal.test(data = TeamDynamicsData,
+             ScienceDomainIdentification~Condition)
+
+#Partner Ratings X Condition#
+kruskal.test(data = TeamDynamicsData, PartnerRatings~Condition)
+```
+#Visualize Group Means by Condition#
+```{r}
+#Stereotype Threat by Condition#
+StereotypeThreatxCondition <- split(StereotypeThreat, Condition)
+StereotypeThreatMeans <- sapply(StereotypeThreatxCondition, mean)
+StereotypeThreatxConditionPlot<- barplot2(StereotypeThreatMeans, xlab = "Condition", 
+                                         ylim = c(1,5), ylab = "Mean", 
+                                         names.arg = list("Small-Talk", "Fast-Friends"), 
+                                         col = c("Grey", "SteelBlue"), xpd = FALSE, 
+                                         main = "Stereotype Threat by Condition",
+                                         sub = substitute(paste("H(1) = 0.005, ", 
+                                                                       italic('p'), "= 0.94")))
+
+#Communal Goal Affordance by Condition#
+CommunalGoalAffordancexCondition <- split(CommunalValue, Condition)
+CommunalGoalAffordanceMeans <- sapply(CommunalGoalAffordancexCondition, mean)
+CommunalGoalAffordancexConditionPlot<- barplot2(CommunalGoalAffordanceMeans, xlab = "Condition",
+                                                ylim = c(1,7), ylab = "Mean", 
+                                                names.arg = list("Small-Talk", "Fast-Friends"),
+                                                col = c("Grey", "SteelBlue"), xpd = FALSE,
+                                                main = "Communal Goal Affordances by Condition",
+                                                sub = substitute(paste("H(1) = 1.34, ", 
+                                                                       italic('p'), "= 0.24")))
+                                                
+#State Anxiety by Condition#
+StateAnxietyxCondition <- split(StateAnxiety, Condition)
+StateAnxietyMeans <- sapply(StateAnxietyxCondition, mean)
+StateAnxietyxConditionPlot<- barplot2(StateAnxietyMeans, xlab = "Condition",
+                                                ylim = c(1,4), ylab = "Mean", 
+                                                names.arg = list("Small-Talk", "Fast-Friends"),
+                                                col = c("Grey", "SteelBlue"), xpd = FALSE,
+                                                main = "State Anxiety by Condition",
+                                                sub = substitute(paste("H(1) = 0.70, ", 
+                                                                       italic('p'), "= 0.40")))
+
+#Belonging by Condition#
+BelongingxCondition <- split(Belonging, Condition)
+BelongingMeans <- sapply(BelongingxCondition, mean)
+BelongingxConditionPlot<- barplot2(BelongingMeans, xlab = "Condition",
+                                                ylim = c(1,7), ylab = "Mean", 
+                                                names.arg = list("Small-Talk", "Fast-Friends"),
+                                                col = c("Grey", "SteelBlue"), xpd = FALSE,
+                                                main = "Belonging by Condition",
+                                                sub = substitute(paste("H(1) = 0.45, ", 
+                                                                       italic('p'), "= 0.50")))
+
+#Science Motivation by Condition#
+ScienceMotivationxCondition <- split(ScienceMotivation, Condition)
+ScienceMotivationMeans <- sapply(ScienceMotivationxCondition, mean)
+ScienceMotivationxConditionPlot<- barplot2(ScienceMotivationMeans, xlab = "Condition",
+                                                ylim = c(1,7), ylab = "Mean", 
+                                                names.arg = list("Small-Talk", "Fast-Friends"),
+                                                col = c("Grey", "SteelBlue"), xpd = FALSE,
+                                                main = "Science Motivation by Condition",
+                                                sub = substitute(paste("H(1) = 0.20, ", 
+                                                                       italic('p'), "= 0.66")))
+
+#Science Domain Identification by Condition#
+ScienceDomainIdentificationxCondition <- split(ScienceDomainIdentification, Condition)
+ScienceDomainIdentificationMeans <- sapply(ScienceDomainIdentificationxCondition, mean)
+ScienceDomainIdentificationxConditionPlot <- barplot2(ScienceDomainIdentificationMeans, 
+                                                      xlab = "Condition", ylim = c(1,5),
+                                                      ylab = "Mean", names.arg = list
+                                                      ("Small-Talk", "Fast-Friends"),
+                                                      col = c("Grey", "Steelblue"), xpd = FALSE,
+                                                      main = "Science Domain Identification 
+                                                      by Condition", sub = substitute(paste(
+                                                            "H(1) = 0.77, ", italic('p'),
+                                                            "= 0.38")))
+
+#Partner Ratings by Condition#
+PartnerRatingsxCondition <- split(PartnerRatings, Condition)
+PartnerRatingsMeans <- sapply(PartnerRatingsxCondition, mean)
+PartnerRatingsxConditionPlot <- barplot2(PartnerRatingsMeans, xlab = "Condition", ylim = c(1,9),
+                                                      ylab = "Mean", names.arg = list
+                                                      ("Small-Talk", "Fast-Friends"),
+                                                      col = c("Grey", "Steelblue"), xpd = FALSE,
+                                                      main = "Partner Ratings by Condition", 
+                                                      sub = substitute(paste("H(1) = 0.71, ",
+                                                      italic('p'), "= 0.40")))
+```
+#Conduct Path Analysis for Study Model#
+```{r}
+#Create Correlation Matrix of Model Factors#
+PathVariables <- c("Condition", "StereotypeThreat", "CommunalValue", 
+                   "StateAnxiety", "Belonging", "ScienceMotivation")
+Path.Matrix <- cov(TeamDynamicsData[PathVariables])
+
+#Create Model for Path Analysis#
+TeamDynamicsPath.Model = '
+ScienceMotivation ~ D1*Belonging
+Belonging ~ C2*StateAnxiety + C1*CommunalValue
+CommunalValue ~ B1*StereotypeThreat
+StateAnxiety ~ B2*StereotypeThreat
+StereotypeThreat ~ A1*Condition
+indirect1:= A1*B1*C1*D1
+#Condition->StereotypeThreat->CommunalValue->Belonging->ScienceMotivation#
+indirect2:= A1*B2*C2*D1
+#Condition->StereotypeThreat->StateAnxiety->Belonging->ScienceMotivation#
+'
+
+#Run Path Analysis with 1000 Bootstrapped Items#
+TeamDynamics.ModelFit <- lavaan::sem(data = TeamDynamicsData, TeamDynamicsPath.Model, sample.cov = Path.Matrix, sample.nobs = 152, se = "bootstrap", bootstrap = 1000)
+
+#View Path Analysis Results#
+summary(TeamDynamics.ModelFit, fit.measures = TRUE, standardized = TRUE)
+```
+#Visualize Path Model#
+```{r}
+TeamDynamics.Model <- semPaths(object = TeamDynamics.ModelFit, nCharNodes = 0, 
+                               color = "steelblue", reorder = FALSE, intercepts = FALSE,
+                               residuals = FALSE, thresholds = FALSE, whatLabels = "par", 
+                               layout = "spring", springLevels = TRUE, rotation = 2)
+```
+
